@@ -1,12 +1,13 @@
 import sys
 from AX12A import *
 
-if len(sys.argv) != 3:
-    print("Usage: python3 setid.py OLD_ID NEW_ID");
+if len(sys.argv) != 4:
+    print("Usage: python3 setid.py TTY_NAME OLD_ID NEW_ID");
     quit(1);
 
-oldId = int(sys.argv[1])
-newId = int(sys.argv[2])
+ttyName = sys.argv[1];
+oldId = int(sys.argv[2])
+newId = int(sys.argv[3])
 
 try:
     ax12a = AX12A('/dev/tty.usbserial-FT3WFGSI', oldId)

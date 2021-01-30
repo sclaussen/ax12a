@@ -1,4 +1,12 @@
+import sys
 from AX12A import *
+
+if len(sys.argv) != 2:
+    print("Usage: python3 discover-id.py TTY_NAME");
+    quit(1);
+
+ttyName = sys.argv[1]
+
 
 # The ID is a unique value in the network to identify each
 # DYNAMIXEL with an Instruction Packet. 0~252 (0xFC) values can be
@@ -8,7 +16,7 @@ from AX12A import *
 # for deviceId in range(0, 252):
 for deviceId in range(0, 252):
     try:
-        ax12a = AX12A('/dev/tty.usbserial-FT3WFGSI', deviceId)
+        ax12a = AX12A(ttyName, deviceId)
     except Exception as e:
         continue
     print("SUCCESS: Discovered a Robotis AX-12A actuator at ID %s" % deviceId)
