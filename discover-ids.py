@@ -11,4 +11,4 @@ for deviceId in range(0, 252):
         ax12a = AX12A('/dev/tty.usbserial-FT3WFGSI', deviceId)
     except Exception as e:
         continue
-    print("SUCCESS: An AX-12A is at ID %s" % deviceId)
+    print("SUCCESS: Discovered a Robotis AX-12A actuator at ID %s" % deviceId)

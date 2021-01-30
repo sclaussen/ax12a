@@ -10,8 +10,6 @@ for deviceId in range(0, 252):
     try:
         ax12a = AX12A('/dev/tty.usbserial-FT3WFGSI', deviceId)
     except Exception as e:
-        print(e)
-        print("Unable to connect to the AX-12A (tty=%s, id=%s)" % ('/dev/tty.usbserial-FT3WFGSI', deviceId))
         continue
-    print("SUCCESS: This AX-12A's ID is %s" % deviceId)
+    print("SUCCESS: Discovered a Robotis AX-12A actuator at ID %s" % deviceId)
     break
