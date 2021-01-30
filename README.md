@@ -8,10 +8,10 @@ Dynapixel SDK Python functions.
 
 The scripts section below provides some useful scripts to get started
 with the AX-12A actuators.  They can also be used as simple getting
-started samples for how to use the AX12A Python class included in this
-repository.  That said, the class is rather trivial to use, containing
-getters/setters for all the properties in the control table of the
-AX-12A actuator.  Here's a quick usage sample:
+started samples for how to use the [AX12A Python class](./AX12A.py)
+included in this repository.  That said, the class is rather trivial
+to use, containing getters/setters for all the properties in the
+control table of the AX-12A actuator.  Here's a quick usage sample:
 
 ```
 ax12a = AX12A("/dev/tty.usbserial-FT3WFGSI", 1);  # where 1 is the AX-12A's ID
@@ -58,7 +58,8 @@ found by running `ls /dev/tty.usbserial*`.
 
 ## interrogate
 
-Python script to interrogate an AX-12A actuator using the AX12A class.
+[Python script](./interrogate.py) to interrogate an AX-12A actuator
+using the AX12A class.
 
 ```
 $ python3 interrogate.py /dev/tty.usbserial-FT3WFGSI 1
@@ -99,9 +100,9 @@ $ python3 interrogate.py /dev/tty.usbserial-FT3WFGSI 1
 
 ## discover-id
 
-Python script to discover the ID of the first AX-12A actuator on the
-bus using the AX12A class.  This script is useful if you have a single
-AX-12A actuator connected on the bus.
+[Python script](./discover-id.py) to discover the ID of the first
+AX-12A actuator on the bus using the AX12A class.  This script is
+useful if you have a single AX-12A actuator connected on the bus.
 
 ```
 $ p3 discover-id.py /dev/tty.usbserial-FT3WFGSI
@@ -112,9 +113,9 @@ SUCCESS: Discovered a Robotis AX-12A actuator at ID 1
 
 ## discover-ids
 
-Python script to discover all the IDs of the AX-12A actuators on the
-bus using the AX12A class.  This script is useful if you have several
-AX-12A actuators connected on the bus.
+[Python script](./discover-ids.py) to discover all the IDs of the
+AX-12A actuators on the bus using the AX12A class.  This script is
+useful if you have several AX-12A actuators connected on the bus.
 
 ```
 $ p3 discover-ids.py /dev/tty.usbserial-FT3WFGSI
@@ -129,7 +130,8 @@ SUCCESS: Discovered a Robotis AX-12A actuator at ID 5
 
 ## set-id
 
-Python script to change the ID of an AX-12A actuator using the AX12A class.
+[Python script](./set-id.py) to change the ID of an AX-12A actuator
+using the AX12A class.
 
 ```
 $ python3 set-id.py /dev/tty.usbserial-FT3WFGSI 5 9
