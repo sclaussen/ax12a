@@ -1,5 +1,6 @@
-This repository contains a Python class to provide a simple but useful
-abstraction for the Robotis Dynapixel SDK Python functions.
+This repository contains a Python class and some getting started
+scripts to provide a simple but useful abstraction for the Robotis
+Dynapixel SDK Python functions.
 
 
 
@@ -7,15 +8,13 @@ abstraction for the Robotis Dynapixel SDK Python functions.
 
 The scripts section below provides some useful scripts to get started
 with the AX-12A actuators.  They can also be used as simple getting
-started samples for how to use the AX12A Python class.  That said,
-it's rather trivial to use, containing getters/setters for all the
-properties in the control table of the AX-12A actuator.  Here's a
-quick usage sample:
+started samples for how to use the AX12A Python class included in this
+repository.  That said, the class is rather trivial to use, containing
+getters/setters for all the properties in the control table of the
+AX-12A actuator.  Here's a quick usage sample:
 
 ```
-ttyName = "/dev/tty.usbserial-FT3WFGSI"
-deviceId = 1
-ax12a = AX12A(ttyName, deviceId);
+ax12a = AX12A("/dev/tty.usbserial-FT3WFGSI", 1);  # where 1 is the AX-12A's ID
 ax12a.getId();
 ax12a.setId(2);
 ax12a.setGoalPosition(300);
@@ -27,14 +26,14 @@ ax12a.setGoalPosition(300);
 
 ## Dynapixel SDK
 
-My AX12A class uses the Dynamixel SDK, thus it'll need to be cloned
-and the python libraries installed.  I'm using ~/src here as an
-example, but of course, any directory will work.
+The AX12A class abstracts the Dynamixel SDK, thus the SDK will need to
+be cloned and the python libraries installed.  I'm using ~/src here as
+an example, but of course, any directory will work.
 
 ```
 cd ~/src
 git clone https://github.com/ROBOTIS-GIT/DynamixelSDK.git
-cd src/python
+cd DynamixelSDK/src/python
 python3 setup.py install
 ```
 
@@ -130,7 +129,7 @@ Python script to change the ID of an AX-12A actuator using the AX12A class.
 
 ```
 $ python3 set-id.py /dev/tty.usbserial-FT3WFGSI 5 9
-Successfully connected to AX-12A with ID: 5
-Change id from 5 to 9? [Y/n]
-SUCCESS: The AX-12A's ID was updated to 9
+SUCCESS: Discovered the Robotis AX-12A actuator at ID 5
+Change the Robotis AX-12A actuator ID from 5 to 9? [Y/n]
+SUCCESS: Updated the Robotis AX-12A actuator to ID 9
 ```
