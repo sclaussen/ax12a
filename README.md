@@ -99,7 +99,9 @@ $ python3 interrogate.py /dev/tty.usbserial-FT3WFGSI 1
 
 ## discover-id
 
-Python script to discover the ID of the first AX-12A actuator on the bus using the AX12A class.
+Python script to discover the ID of the first AX-12A actuator on the
+bus using the AX12A class.  This script is useful if you have a single
+AX-12A actuator connected on the bus.
 
 ```
 $ p3 discover-id.py /dev/tty.usbserial-FT3WFGSI
@@ -110,7 +112,9 @@ SUCCESS: Discovered a Robotis AX-12A actuator at ID 1
 
 ## discover-ids
 
-Python script to discover all the IDs of the AX-12A actuators on the bus using the AX12A class.
+Python script to discover all the IDs of the AX-12A actuators on the
+bus using the AX12A class.  This script is useful if you have several
+AX-12A actuators connected on the bus.
 
 ```
 $ p3 discover-ids.py /dev/tty.usbserial-FT3WFGSI
