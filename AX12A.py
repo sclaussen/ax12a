@@ -37,6 +37,7 @@ FIELD_LOCK = 47
 FIELD_PUNCH = 48
 
 class AX12A:
+    ttyName = None
     tty = None
     deviceId = None
     protocol = sdk.PacketHandler(1.0)
@@ -44,9 +45,12 @@ class AX12A:
     # EEPROM Control Area (durable)
 
     def __init__(self, tty, deviceId):
+        self.ttyName = tty
         self.tty = sdk.PortHandler(tty)
         self.deviceId = deviceId
-
+        # Verify that the connection over the tty to the deviceId
+        # specified works
+        self.getId()
 
 
     # This address stores model number of DYNAMIXEL.
@@ -71,7 +75,7 @@ class AX12A:
 
     def setId(self, value):
         self.__write1(FIELD_ID, value)
-
+        self.deviceId = value
 
 
     # Baud Rate determines serial communication speed between a
@@ -459,7 +463,7 @@ class AX12A:
         self.tty.openPort()
         self.tty.setBaudRate(1000000)
         response, result, error = self.protocol.read1ByteTxRx(self.tty, self.deviceId, field)
-        self.__verifyResponse(result, error)
+        self.__verifyResponse(result, error, "read1ByteTxRx (tty: " + self.ttyName + " id=" + str(self.deviceId) + " field=" + self.__fieldToString(field) + ")")
         self.tty.closePort()
         return response
 
@@ -467,7 +471,7 @@ class AX12A:
         self.tty.openPort()
         self.tty.setBaudRate(1000000)
         response, result, error = self.protocol.read2ByteTxRx(self.tty, self.deviceId, field)
-        self.__verifyResponse(result, error)
+        self.__verifyResponse(result, error, "read2ByteTxRx (tty: " + self.ttyName + " id=" + str(self.deviceId) + " field=" + self.__fieldToString(field) + ")")
         self.tty.closePort()
         return response
 
@@ -475,19 +479,84 @@ class AX12A:
         self.tty.openPort()
         self.tty.setBaudRate(1000000)
         result, error = self.protocol.write1ByteTxRx(self.tty, self.deviceId, field, value)
-        self.__verifyResponse(result, error)
+        self.__verifyResponse(result, error, "write1ByteTxRx (tty: " + self.ttyName + " id=" + str(self.deviceId) + " field=" + self.__fieldToString(field) + " value=" + str(value) + ")")
         self.tty.closePort()
 
     def __write2(self, field, value):
         self.tty.openPort()
         self.tty.setBaudRate(1000000)
         result, error = self.protocol.write2ByteTxRx(self.tty, self.deviceId, field, value)
-        self.__verifyResponse(result, error)
+        self.__verifyResponse(result, error, "write2ByteTxRx (tty: " + self.ttyName + " id=" + str(self.deviceId) + " field=" + self.__fieldToString(field) + " value=" + str(value) + ")")
         self.tty.closePort()
 
-    def __verifyResponse(self, result, error):
+    def __verifyResponse(self, result, error, s):
         if result != sdk.COMM_SUCCESS:
-            print("%s" % self.protocol.getTxRxResult(result))
+            raise Exception("%s %s" % (s, self.protocol.getTxRxResult(result)))
         elif error != 0:
-            print("%s" % self.protocol.getRxPacketError(error))
-            quit()
+            raise Exception("%s %s" % (s, self.protocol.getRxPacketError(error)))
+
+    def __fieldToString(self, field):
+        if field == FIELD_MODEL_NUMBER:
+            return "MODEL_NUMBER"
+        if field == FIELD_FIRMWARE_VERSION:
+            return "FIRMWARE_VERSION"
+        if field == FIELD_ID:
+            return "ID"
+        if field == FIELD_BAUD_RATE:
+            return "BAUD_RATE"
+        if field == FIELD_RETURN_DELAY_TIME:
+            return "RETURN_DELAY_TIME"
+        if field == FIELD_CW_ANGLE_LIMIT:
+            return "CW_ANGLE_LIMIT"
+        if field == FIELD_CCW_ANGLE_LIMIT:
+            return "CCW_ANGLE_LIMIT"
+        if field == FIELD_TEMPERATURE_LIMIT:
+            return "TEMPERATURE_LIMIT"
+        if field == FIELD_MIN_VOLTAGE_LIMIT:
+            return "MIN_VOLTAGE_LIMIT"
+        if field == FIELD_MAX_VOLTAGE_LIMIT:
+            return "MAX_VOLTAGE_LIMIT"
+        if field == FIELD_MAX_TORQUE:
+            return "MAX_TORQUE"
+        if field == FIELD_STATUS_RETURN_LEVEL:
+            return "STATUS_RETURN_LEVEL"
+        if field == FIELD_ALARM_LED:
+            return "ALARM_LED"
+        if field == FIELD_SHUTDOWN:
+            return "SHUTDOWN"
+        if field == FIELD_TORQUE_ENABLE:
+            return "TORQUE_ENABLE"
+        if field == FIELD_LED:
+            return "LED"
+        if field == FIELD_CW_COMPLIANCE_MARGIN:
+            return "CW_COMPLIANCE_MARGIN"
+        if field == FIELD_CCW_COMPLIANCE_MARGIN:
+            return "CCW_COMPLIANCE_MARGIN"
+        if field == FIELD_CW_COMPLIANCE_SLOPE:
+            return "CW_COMPLIANCE_SLOPE"
+        if field == FIELD_CCW_COMPLIANCE_SLOPE:
+            return "CCW_COMPLIANCE_SLOPE"
+        if field == FIELD_GOAL_POSITION:
+            return "GOAL_POSITION"
+        if field == FIELD_MOVING_SPEED:
+            return "MOVING_SPEED"
+        if field == FIELD_TORQUE_LIMIT:
+            return "TORQUE_LIMIT"
+        if field == FIELD_PRESENT_POSITION:
+            return "PRESENT_POSITION"
+        if field == FIELD_PRESENT_SPEED:
+            return "PRESENT_SPEED"
+        if field == FIELD_PRESENT_LOAD:
+            return "PRESENT_LOAD"
+        if field == FIELD_PRESENT_VOLTAGE:
+            return "PRESENT_VOLTAGE"
+        if field == FIELD_PRESENT_TEMPERATURE:
+            return "PRESENT_TEMPERATURE"
+        if field == FIELD_REGISTERED_INSTRUCTION:
+            return "REGISTERED_INSTRUCTION"
+        if field == FIELD_MOVING:
+            return "MOVING"
+        if field == FIELD_LOCK:
+            return "LOCK"
+        if field == FIELD_PUNCH:
+            return "PUNCH"
