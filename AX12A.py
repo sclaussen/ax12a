@@ -42,8 +42,17 @@ class AX12A:
     deviceId = None
     protocol = sdk.PacketHandler(1.0)
 
-    # EEPROM Control Area (durable)
 
+
+    #==========================================================================
+    # EEPROM Control Area (durable)
+    #==========================================================================
+
+
+
+    # Constructor - it attempts to communicate with the AX-12A over
+    # the tty at the specified deviceId by invoking getId(), if that
+    # fails, an exception is thrown.
     def __init__(self, tty, deviceId):
         self.ttyName = tty
         self.tty = sdk.PortHandler(tty)
@@ -53,13 +62,16 @@ class AX12A:
         self.getId()
 
 
+
     # This address stores model number of DYNAMIXEL.
+    # Read Only
     def getModelNumber(self):
         return self.__read2(FIELD_MODEL_NUMBER)
 
 
 
     # This address stores firmware version of DYNAMIXEL.
+    # Read Only
     def getFirmwareVersion(self):
         return self.__read1(FIELD_FIRMWARE_VERSION)
 
@@ -224,7 +236,9 @@ class AX12A:
 
 
 
+    #==========================================================================
     # RAM Control Area (transient)
+    #==========================================================================
 
 
 
@@ -336,7 +350,6 @@ class AX12A:
     # In Wheel Mode, only the output control is possible, not speed.
     # For example, if it is set to 512, it means the output is
     # controlled by 50% of the maximum output.
-
     def getMovingSpeed(self):
         return self.__read2(FIELD_MOVING_SPEED)
 
@@ -360,6 +373,7 @@ class AX12A:
 
     # It is the present position value of DYNAMIXEL.
     # The range of the value is 0~1023 (0x3FF), and the unit is 0.29 [°].
+    # Read Only
     def getPresentPosition(self):
         return self.__read2(FIELD_PRESENT_POSITION)
 
@@ -383,6 +397,7 @@ class AX12A:
     # The unit is about 0.1%. For example, if it is set to 512, it
     # means that the torque is controlled by 50% of the maximum torque
     # to the CCW direction.
+    # Read Only
     def getPresentSpeed(self):
         return self.__read2(FIELD_PRESENT_SPEED);
 
@@ -396,6 +411,7 @@ class AX12A:
     # direction, and 1,024 is equal to 0. For example, the value is
     # 512, it means the load is detected in the direction of CCW about
     # 50% of the maximum torque.
+    # Read Only
     def getPresentLoad(self):
         return self.__read2(FIELD_PRESENT_LOAD);
 
@@ -407,6 +423,7 @@ class AX12A:
     # value is out of range, Voltage Range Error Bit (Bit0) of Status
     # Packet is returned as ‘1’ and Alarm is triggered and set the
     # address 17 and set 1 to the Bit 0 of the address 18.
+    # Read Only
     def getPresentVoltage(self):
         return self.__read1(FIELD_PRESENT_VOLTAGE);
 
@@ -416,6 +433,7 @@ class AX12A:
     # value is identical to the actual temperature in Celsius. For
     # example, if the data value is 85 (0x55), the current internal
     # temperature is 85°C.
+    # Read Only
     def getPresentTemperature(self):
         return self.__read1(FIELD_PRESENT_TEMPERATURE);
 
@@ -423,6 +441,7 @@ class AX12A:
 
     # 0 No instruction registered by REG_WRITE.
     # 1 Instruction registered by REG_WRITE exsists.
+    # Read Only
     def getRegisteredInstruction(self):
         return self.__read1(FIELD_REGISTERED_INSTRUCTION);
 
@@ -430,6 +449,7 @@ class AX12A:
 
     # 0 Goal position command execution is completed
     # 1 Goal position command execution is in progress
+    # Read Only
     def getMoving(self):
         return self.__read1(FIELD_MOVING);
 
@@ -455,7 +475,9 @@ class AX12A:
 
 
 
+    #==========================================================================
     # Private functions
+    #==========================================================================
 
 
 
