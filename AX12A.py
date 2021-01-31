@@ -37,6 +37,8 @@ FIELD_LOCK = 47
 FIELD_PUNCH = 48
 
 class AX12A:
+    BROADCAST = 254
+
     ttyName = None
     tty = None
     deviceId = None
@@ -59,96 +61,153 @@ class AX12A:
         self.deviceId = deviceId
         # Verify that the connection over the tty to the deviceId
         # specified works
-        self.getId()
+        if self.deviceId != self.BROADCAST:
+            try:
+                self.getId()
+            except:
+                raise Exception("ERROR: Unable to communicate with the AX-12A")
 
 
 
     # This address stores model number of DYNAMIXEL.
+    #
+    # Control Table 0
     # Read Only
     def getModelNumber(self):
-        return self.__read2(FIELD_MODEL_NUMBER)
+        return self.__read2Bytes(FIELD_MODEL_NUMBER)
 
 
 
     # This address stores firmware version of DYNAMIXEL.
+    #
+    # Control Table 2
     # Read Only
     def getFirmwareVersion(self):
-        return self.__read1(FIELD_FIRMWARE_VERSION)
+        return self.__read1Byte(FIELD_FIRMWARE_VERSION)
 
 
 
     # The ID is a unique value in the network to identify each
-    # DYNAMIXEL with an Instruction Packet. 0~252 (0xFC) values can be
-    # used as an ID, and 254(0xFE) is occupied as a broadcast ID. The
-    # Broadcast ID(254, 0xFE) can send an Instruction Packet to all
-    # connected DYNAMIXEL simultaneously.
+    # DYNAMIXEL with an Instruction Packet.
+    #
+    # 0~252 (0xFC) values can be used as an ID, and
+    #
+    # 254 (0xFE) is occupied as a broadcast ID.  The Broadcast ID
+    # (254, 0xFE) can send an Instruction Packet to all connected
+    # DYNAMIXEL simultaneously.
+    #
+    # Control Table 3
     def getId(self):
-        return self.__read1(FIELD_ID)
+        return self.__read1Byte(FIELD_ID)
 
     def setId(self, value):
-        self.__write1(FIELD_ID, value)
+        self.__write1Byte(FIELD_ID, value)
         self.deviceId = value
 
 
     # Baud Rate determines serial communication speed between a
     # controller and DYNAMIXEL’s.
+    #
+    # Control Table 4
     def getBaudRate(self):
-        return self.__read1(FIELD_BAUD_RATE)
+        return self.__read1Byte(FIELD_BAUD_RATE)
 
     def setBaudRate(self, value):
-        self.__write1(FIELD_BAUD_RATE, value)
+        self.__write1Byte(FIELD_BAUD_RATE, value)
 
 
 
     # If the DYNAMIXEL receives an Instruction Packet, it will return
     # the Status Packet after the time of the set Return Delay
-    # Time(5).  Note that the range of values is 0 to 254 (0XFE) and
-    # its unit is 2 [μsec]. For instance, if the Return Delay Time(5)
-    # is set to ‘10’, the Status Packet will be returned after
-    # 20[μsec] when the Instruction Packet is received.
+    # Time(5).
+    #
+    # Note that the range of values is 0 to 254 (0XFE) and its unit is
+    # 2 [μsec]. For instance, if the Return Delay Time(5) is set to
+    # ‘10’, the Status Packet will be returned after 20[μsec] when the
+    # Instruction Packet is received.
+    #
+    # Control Table 5
     def getReturnDelayTime(self):
-        return self.__read1(FIELD_RETURN_DELAY_TIME);
+        return self.__read1Byte(FIELD_RETURN_DELAY_TIME);
 
     def setReturnDelayTime(self, value):
-        self.__write1(FIELD_RETURN_DELAY_TIME, value);
+        self.__write1Byte(FIELD_RETURN_DELAY_TIME, value);
 
 
 
     # The angle limit allows the motion to be restrained. The range
-    # and the unit of the value is the same as Goal Position(30).  CW
-    # Angle Limit: the minimum value of Goal Position(30) CCW Angle
-    # Limit: the maximum value of Goal Position(30) The following two
-    # modes can be set pursuant to the value of CW and CCW.
+    # and the unit of the value is the same as Goal Position(30).
     #
-    # Wheel Mode  both are 0
-    # Joint Mode  neither are 0
+    # CW Angle Limit: the minimum value of Goal Position(30)
+    #
+    # CCW Angle Limit: the maximum value of Goal Position(30)
+    #
+    # The following two modes can be set pursuant to the value of CW
+    # and CCW.
+    #
+    # Wheel Mode:  both are 0
+    # Joint Mode:  neither are 0
     #
     # The wheel mode can be used to wheel-type operation robots since
     # motors of the robots spin infinitely. The joint mode can be used
     # to multi-joints robot since the robots can be controlled with
     # specific angles.
+    #
+    # Control Table 6
     def getCwAngleLimit(self):
-        return self.__read2(FIELD_CW_ANGLE_LIMIT)
+        return self.__read2Bytes(FIELD_CW_ANGLE_LIMIT)
 
     def setCwAngleLimit(self, value):
-        self.__write2(FIELD_CW_ANGLE_LIMIT, value)
+        self.__write2Bytes(FIELD_CW_ANGLE_LIMIT, value)
 
 
 
+
+    # The angle limit allows the motion to be restrained. The range
+    # and the unit of the value is the same as Goal Position(30).
+    #
+    # CW Angle Limit: the minimum value of Goal Position(30)
+    #
+    # CCW Angle Limit: the maximum value of Goal Position(30)
+    #
+    # The following two modes can be set pursuant to the value of CW
+    # and CCW.
+    #
+    # Wheel Mode:  both are 0
+    # Joint Mode:  neither are 0
+    #
+    # The wheel mode can be used to wheel-type operation robots since
+    # motors of the robots spin infinitely. The joint mode can be used
+    # to multi-joints robot since the robots can be controlled with
+    # specific angles.
+    #
+    # Control Table 8
     def getCcwAngleLimit(self):
-        return self.__read2(FIELD_CCW_ANGLE_LIMIT)
+        return self.__read2Bytes(FIELD_CCW_ANGLE_LIMIT)
 
     def setCcwAngleLimit(self, value):
-        self.__write2(FIELD_CCW_ANGLE_LIMIT, value)
+        self.__write2Bytes(FIELD_CCW_ANGLE_LIMIT, value)
+
+
+
+    def setWheelMode(self):
+        self.setCwAngleLimit(0);
+        self.setCcwAngleLimit(0);
+
+    def setJointMode(self):
+        self.setCwAngleLimit(0);
+        self.setCcwAngleLimit(1023);
 
 
 
     # About 1°C 0 ~ 99
+    #
+    # Control Table 11
     def getTemperatureLimit(self):
-        return self.__read1(FIELD_TEMPERATURE_LIMIT)
+        return self.__read1Byte(FIELD_TEMPERATURE_LIMIT)
 
     def setTemperatureLimit(self, value):
-        self.__write1(FIELD_TEMPERATURE_LIMIT, value)
+        self.__write1Byte(FIELD_TEMPERATURE_LIMIT, value)
 
 
 
@@ -158,60 +217,79 @@ class AX12A:
     # Voltage(42) is out of the range, Voltage Range Error Bit (Bit0)
     # of Status Packet is returned as ‘1’ and Alarm is triggered as
     # set in the addresses 17 and 18.
+    #
+    # Control Table 12
     def getMinVoltageLimit(self):
-        return self.__read1(FIELD_MIN_VOLTAGE_LIMIT);
+        return self.__read1Byte(FIELD_MIN_VOLTAGE_LIMIT);
 
     def setMinVoltageLimit(self, value):
-        self.__write1(FIELD_MIN_VOLTAGE_LIMIT, value);
+        self.__write1Byte(FIELD_MIN_VOLTAGE_LIMIT, value);
 
 
 
+    # About 0.1V        50 ~ 160        5.0 ~ 16.0V
+    #
+    # For example, if the value is 80, the voltage is 8V. If Present
+    # Voltage(42) is out of the range, Voltage Range Error Bit (Bit0)
+    # of Status Packet is returned as ‘1’ and Alarm is triggered as
+    # set in the addresses 17 and 18.
+    #
+    # Control Table 13
     def getMaxVoltageLimit(self):
-        return self.__read1(FIELD_MAX_VOLTAGE_LIMIT);
+        return self.__read1Byte(FIELD_MAX_VOLTAGE_LIMIT);
 
     def setMaxVoltageLimit(self, value):
-        self.__write1(FIELD_MAX_VOLTAGE_LIMIT, value);
+        self.__write1Byte(FIELD_MAX_VOLTAGE_LIMIT, value);
 
 
 
-    # It is the torque value of maximum output. 0 to 1,023 (0x3FF) can
-    # be used, and the unit is about 0.1%.  For example, Data 1,023
-    # (0x3FF) means that DYNAMIXEL will use 100% of the maximum torque
-    # it can produce while Data 512 (0x200) means that DYNAMIXEL will
-    # use 50% of the maximum torque.  When the power is turned on,
-    # Torque Limit(34) uses the value as the initial value.
+    # It is the torque value of maximum output.
+    #
+    # 0 to 1,023 (0x3FF) can be used, and the unit is about 0.1%.
+    #
+    # For example, Data 1,023 (0x3FF) means that DYNAMIXEL will use
+    # 100% of the maximum torque it can produce while Data 512 (0x200)
+    # means that DYNAMIXEL will use 50% of the maximum torque.  When
+    # the power is turned on, Torque Limit(34) uses the value as the
+    # initial value.
+    #
+    # Control Table 14
     def getMaxTorque(self):
-        return self.__read2(FIELD_MAX_TORQUE);
+        return self.__read2Bytes(FIELD_MAX_TORQUE);
 
     def setMaxTorque(self, value):
-        self.__write2(FIELD_MAX_TORQUE, value);
+        self.__write2Bytes(FIELD_MAX_TORQUE, value);
 
 
 
     # The Status Return Level(68) decides how to return Status Packet
     # when DYNAMIXEL receives an Instruction Packet.
+    #
     # 0 PING Instruction        Returns the Status Packet for PING Instruction only
     # 1 PING/Read Instruction   Returns the Status Packet for PING and READ Instruction
     # 2 All Instructions        Returns the Status Packet for all Instructions
+    #
+    # Control Table 16
     def getStatusReturnLevel(self):
-        return self.__read1(FIELD_STATUS_RETURN_LEVEL);
+        return self.__read1Byte(FIELD_STATUS_RETURN_LEVEL);
 
     def setStatusReturnLevel(self, value):
-        self.__write1(FIELD_STATUS_RETURN_LEVEL, value);
+        self.__write1Byte(FIELD_STATUS_RETURN_LEVEL, value);
 
 
 
     # The DYNAMIXEL can protect itself by detecting dangerous
-    # situations that could occur during the operation.  Each Bit
-    # is inclusively processed with the ‘OR’ logic, therefore,
-    # multiple options can be generated.  For instance, when
-    # ‘0x05’ (binary : 00000101) is defined in Shutdown(18),
-    # DYNAMIXEL can detect both Input Voltage Error(binary :
-    # 00000001) and Overheating Error(binary : 00000100).  If
-    # those errors are detected, Torque Enable(24) is cleared to
-    # ‘0’ and the motor output becomes 0 [%].  REBOOT is the only
-    # method to reset Torque Enable(24) to ‘1’(Torque ON) after
-    # the shutdown. The followings are detectable situations.
+    # situations that could occur during the operation.  Each Bit is
+    # inclusively processed with the ‘OR’ logic, therefore, multiple
+    # options can be generated.  For instance, when ‘0x05’ (binary :
+    # 00000101) is defined in Shutdown(18), DYNAMIXEL can detect both
+    # Input Voltage Error (binary : 00000001) and Overheating Error
+    # (binary : 00000100).  If those errors are detected, Torque
+    # Enable(24) is cleared to ‘0’ and the motor output becomes 0 [%].
+    # REBOOT is the only method to reset Torque Enable(24) to ‘1’
+    # (Torque ON) after the shutdown. The followings are detectable
+    # situations.
+    #
     # Bit 7     0       -
     # Bit 6     Instruction Error       Detects that undefined Instruction is transmitted or the Action command is delivered without the reg_write command
     # Bit 5     Overload Error  Detects that persistent load exceeds maximum output
@@ -220,19 +298,43 @@ class AX12A:
     # Bit 2     Overheating Error       Detects that the internal temperature exceeds the set temperature
     # Bit 1     Angle Limit Error       Detects that Goal Position is written with the value that is not between CW Angle Limit and CCW Angle Limit
     # Bit 0     Input Voltage Error     Detects that input voltage exceeds the configured operating voltage
+    #
+    # Control Table 17
     def getAlarmLed(self):
-        return self.__read1(FIELD_ALARM_LED);
+        return self.__read1Byte(FIELD_ALARM_LED);
 
     def setAlarmLed(self, value):
-        self.__write1(FIELD_ALARM_LED, value);
+        self.__write1Byte(FIELD_ALARM_LED, value);
 
 
 
+    # The DYNAMIXEL can protect itself by detecting dangerous
+    # situations that could occur during the operation.  Each Bit is
+    # inclusively processed with the ‘OR’ logic, therefore, multiple
+    # options can be generated.  For instance, when ‘0x05’ (binary :
+    # 00000101) is defined in Shutdown(18), DYNAMIXEL can detect both
+    # Input Voltage Error (binary : 00000001) and Overheating Error
+    # (binary : 00000100).  If those errors are detected, Torque
+    # Enable(24) is cleared to ‘0’ and the motor output becomes 0 [%].
+    # REBOOT is the only method to reset Torque Enable(24) to ‘1’
+    # (Torque ON) after the shutdown. The followings are detectable
+    # situations.
+    #
+    # Bit 7     0       -
+    # Bit 6     Instruction Error       Detects that undefined Instruction is transmitted or the Action command is delivered without the reg_write command
+    # Bit 5     Overload Error  Detects that persistent load exceeds maximum output
+    # Bit 4     CheckSum Error  Detects that the Checksum of the transmitted Instruction Packet is invalid
+    # Bit 3     Range Error     Detects that the command is given beyond the range of usage
+    # Bit 2     Overheating Error       Detects that the internal temperature exceeds the set temperature
+    # Bit 1     Angle Limit Error       Detects that Goal Position is written with the value that is not between CW Angle Limit and CCW Angle Limit
+    # Bit 0     Input Voltage Error     Detects that input voltage exceeds the configured operating voltage
+    #
+    # Control Table 18
     def getShutdown(self):
-        return self.__read1(FIELD_SHUTDOWN);
+        return self.__read1Byte(FIELD_SHUTDOWN);
 
     def setShutdown(self, value):
-        self.__write1(FIELD_SHUTDOWN, value);
+        self.__write1Byte(FIELD_SHUTDOWN, value);
 
 
 
@@ -244,21 +346,25 @@ class AX12A:
 
     # 0 (Default)   Turn off the torque
     # 1             Turn on the torque and lock EEPROM area
+    #
+    # Control Table 24
     def getTorqueEnable(self):
-        return self.__read1(FIELD_TORQUE_ENABLE)
+        return self.__read1Byte(FIELD_TORQUE_ENABLE)
 
     def setTorqueEnable(self, value):
-        self.__write1(FIELD_TORQUE_ENABLE, value)
+        self.__write1Byte(FIELD_TORQUE_ENABLE, value)
 
 
 
     # 0 (Default)   Turn OFF the LED
     # 1             Turn ON the LED
+    #
+    # Control Table 25
     def getLed(self):
-        return self.__read1(FIELD_LED)
+        return self.__read1Byte(FIELD_LED)
 
     def setLed(self, value):
-        self.__write1(FIELD_LED, value)
+        self.__write1Byte(FIELD_LED, value)
 
 
 
@@ -267,19 +373,28 @@ class AX12A:
     # value is 0~255, and the unit is the same as Goal
     # Position.(Address 30,31) The greater the value, the more
     # difference occurs.
+    #
+    # Control Table 26
     def getCwComplianceMargin(self):
-        return self.__read1(FIELD_CW_COMPLIANCE_MARGIN);
+        return self.__read1Byte(FIELD_CW_COMPLIANCE_MARGIN);
 
     def setCwComplianceMargin(self, value):
-        self.__write1(FIELD_CW_COMPLIANCE_MARGIN, value);
+        self.__write1Byte(FIELD_CW_COMPLIANCE_MARGIN, value);
 
 
 
+    # It exists in each direction of CW/CCW and means the error
+    # between goal position and present position. The range of the
+    # value is 0~255, and the unit is the same as Goal
+    # Position.(Address 30,31) The greater the value, the more
+    # difference occurs.
+    #
+    # Control Table 27
     def getCcwComplianceMargin(self):
-        return self.__read1(FIELD_CCW_COMPLIANCE_MARGIN);
+        return self.__read1Byte(FIELD_CCW_COMPLIANCE_MARGIN);
 
     def setCcwComplianceMargin(self, value):
-        self.__write1(FIELD_CCW_COMPLIANCE_MARGIN, value);
+        self.__write1Byte(FIELD_CCW_COMPLIANCE_MARGIN, value);
 
 
 
@@ -289,6 +404,7 @@ class AX12A:
     # obtained. Data representative value is actually used value. That
     # is, even if the value is set to 25, 16 is used internally as the
     # representative value.
+    #
     # 1 0(0x00) ~ 3(0x03)       2(0x02)
     # 2 4(0x04) ~ 7(0x07)       4(0x04)
     # 3 8(0x08)~15(0x0F)        8(0x08)
@@ -296,36 +412,60 @@ class AX12A:
     # 5 32(0x20)~63(0x3F)       32(0x20)
     # 6 64(0x40)~127(0x7F)      64(0x40)
     # 7 128(0x80)~254(0xFE)     128(0x80)
+    #
+    # Control Area 28
     def getCwComplianceSlope(self):
-        return self.__read1(FIELD_CW_COMPLIANCE_SLOPE);
+        return self.__read1Byte(FIELD_CW_COMPLIANCE_SLOPE);
 
     def setCwComplianceSlope(self, value):
-        self.__write1(FIELD_CW_COMPLIANCE_SLOPE, value);
+        self.__write1Byte(FIELD_CW_COMPLIANCE_SLOPE, value);
 
 
 
+    # It exists in each direction of CW/CCW and sets the level of
+    # Torque near the goal position. Compliance Slope is set in 7
+    # steps, the higher the value, the more flexibility is
+    # obtained. Data representative value is actually used value. That
+    # is, even if the value is set to 25, 16 is used internally as the
+    # representative value.
+    #
+    # 1 0(0x00) ~ 3(0x03)       2(0x02)
+    # 2 4(0x04) ~ 7(0x07)       4(0x04)
+    # 3 8(0x08)~15(0x0F)        8(0x08)
+    # 4 16(0x10)~31(0x1F)       16(0x10)
+    # 5 32(0x20)~63(0x3F)       32(0x20)
+    # 6 64(0x40)~127(0x7F)      64(0x40)
+    # 7 128(0x80)~254(0xFE)     128(0x80)
+    #
+    # Control Area 29
     def getCcwComplianceSlope(self):
-        return self.__read1(FIELD_CCW_COMPLIANCE_SLOPE);
+        return self.__read1Byte(FIELD_CCW_COMPLIANCE_SLOPE);
 
     def setCcwComplianceSlope(self, value):
-        self.__write1(FIELD_CCW_COMPLIANCE_SLOPE, value);
+        self.__write1Byte(FIELD_CCW_COMPLIANCE_SLOPE, value);
 
 
 
-    # It is a position value of destination. 0 ~ 1,023 (0x3FF) is
-    # available. The unit is 0.29°. If Goal Position is out of the
-    # range, Angle Limit Error Bit (Bit 1) of Status Packet is
-    # returned as ‘1’ and Alarm is triggered as set in Alarm
-    # LED/Shutdown.
+    # It is a position value of destination.
+    #
+    # 0 ~ 1,023 (0x3FF) is available.
+    #
+    # The unit is 0.29°.
+    #
+    # If Goal Position is out of the range, Angle Limit Error Bit (Bit
+    # 1) of Status Packet is returned as ‘1’ and Alarm is triggered as
+    # set in Alarm LED/Shutdown.
+    #
+    # Control Area 30
     def getGoalPosition(self):
-        return self.__read2(FIELD_GOAL_POSITION)
+        return self.__read2Bytes(FIELD_GOAL_POSITION)
 
     def setGoalPosition(self, value):
-        self.__write2(FIELD_GOAL_POSITION, value)
+        self.__write2Bytes(FIELD_GOAL_POSITION, value)
         while True:
             currentPosition = self.getPresentPosition()
             print("[ID:%03d] GoalPos:%03d  PresPos:%03d" % (self.deviceId, value, currentPosition))
-            if abs(value - currentPosition) < 20:
+            if abs(value - currentPosition) < 10:
                 break
 
 
@@ -334,60 +474,85 @@ class AX12A:
     # of the value may vary depending on the operation mode.
     #
     # Joint Mode
-    # 0 ~ 1,023(0x3FF) can be used, and the unit is about 0.111rpm.
+    #
+    # 0 ~ 1,023 (0x3FF) can be used, and the unit is about 0.111rpm.
+    #
     # If it is set to 0, it means the maximum rpm of the motor is used
     # without controlling the speed.
+    #
     # If it is 1023, it is about 114rpm.  For example, if it is set to
     # 300, it is about 33.3 rpm.
     #
     # Wheel Mode
-    # 0 ~ 2,047(0x7FF) can be used, the unit is about 0.1%.
+    #
+    # 0 ~ 2,047 (0x7FF) can be used, the unit is about 0.1%.
+    #
     # If a value in the range of 0 ~ 1,023 is used, it is stopped by
     # setting to 0 while rotating to CCW direction.
+    #
     # If a value in the range of 1,024 ~ 2,047 is used, it is stopped
-    # by setting to 1,024 while rotating to CW direction.  That is,
-    # the 10th bit becomes the direction bit to control the direction.
-    # In Wheel Mode, only the output control is possible, not speed.
-    # For example, if it is set to 512, it means the output is
-    # controlled by 50% of the maximum output.
+    # by setting to 1,024 while rotating to CW direction.
+    #
+    # That is, the 10th bit becomes the direction bit to control the
+    # direction.  In Wheel Mode, only the output control is possible,
+    # not speed.  For example, if it is set to 512, it means the
+    # output is controlled by 50% of the maximum output.
+    #
+    # Control Area 32
     def getMovingSpeed(self):
-        return self.__read2(FIELD_MOVING_SPEED)
+        return self.__read2Bytes(FIELD_MOVING_SPEED)
 
     def setMovingSpeed(self, value):
-        self.__write2(FIELD_MOVING_SPEED, value)
+        self.__write2Bytes(FIELD_MOVING_SPEED, value)
 
 
 
-    # It is the value of the maximum torque limit. 0 ~ 1,023(0x3FF) is
-    # available, and the unit is about 0.1%. For example, if the value
-    # is 512, it is about 50%; that means only 50% of the maximum
-    # torque will be used. If the power is turned on, the value of Max
-    # Torque(14) is used as the initial value.
+    # It is the value of the maximum torque limit.
+    #
+    # 0 ~ 1,023 (0x3FF) is available, and the unit is about 0.1%.
+    #
+    # For example, if the value is 512, it is about 50%; that means
+    # only 50% of the maximum torque will be used. If the power is
+    # turned on, the value of Max Torque(14) is used as the initial
+    # value.
+    #
+    # Control Area 34
     def getTorqueLimit(self):
-        return self.__read2(FIELD_TORQUE_LIMIT)
+        return self.__read2Bytes(FIELD_TORQUE_LIMIT)
 
     def setTorqueLimit(self, value):
-        self.__write2(FIELD_TORQUE_LIMIT, value)
+        self.__write2Bytes(FIELD_TORQUE_LIMIT, value)
 
 
 
     # It is the present position value of DYNAMIXEL.
-    # The range of the value is 0~1023 (0x3FF), and the unit is 0.29 [°].
+    #
+    # The range of the value is 0~1023 (0x3FF), and the unit is 0.29
+    # [°].
+    #
+    # Control Area 36
     # Read Only
     def getPresentPosition(self):
-        return self.__read2(FIELD_PRESENT_POSITION)
+        return self.__read2Bytes(FIELD_PRESENT_POSITION)
 
 
 
-    # It is the present moving speed. 0~2,047 (0x7FF) can be used. If
-    # a value is in the rage of 0~1,023, it means that the motor
-    # rotates to the CCW direction. If a value is in the rage of
-    # 1,024~2,047, it means that the motor rotates to the CW
-    # direction. That is, the 10th bit becomes the direction bit to
-    # control the direction, and 0 and 1,024 are equal. The unit of
-    # this value varies depending on operation mode.
+    # It is the present moving speed.
+    #
+    # 0~2,047 (0x7FF) can be used.
+    #
+    # If a value is in the rage of 0~1,023, it means that the motor
+    # rotates to the CCW direction.
+    #
+    # If a value is in the rage of 1,024~2,047, it means that the
+    # motor rotates to the CW direction.
+    #
+    # That is, the 10th bit becomes the direction bit to control the
+    # direction, and 0 and 1,024 are equal. The unit of this value
+    # varies depending on operation mode.
     #
     # Joint Mode
+    #
     # The unit is about 0.111rpm. For example, if it is set to 300, it
     # means that the motor is moving to the CCW direction at a rate of
     # about 33.3rpm.
@@ -397,35 +562,47 @@ class AX12A:
     # The unit is about 0.1%. For example, if it is set to 512, it
     # means that the torque is controlled by 50% of the maximum torque
     # to the CCW direction.
+    #
+    # Control Area 38
     # Read Only
     def getPresentSpeed(self):
-        return self.__read2(FIELD_PRESENT_SPEED);
+        return self.__read2Bytes(FIELD_PRESENT_SPEED);
 
 
 
-    # It means currently applied load. The range of the value is
-    # 0~2047, and the unit is about 0.1%. If the value is 0~1,023, it
-    # means the load works to the CCW direction. If the value is
-    # 1,024~2,047, it means the load works to the CW direction. That
-    # is, the 10th bit becomes the direction bit to control the
-    # direction, and 1,024 is equal to 0. For example, the value is
-    # 512, it means the load is detected in the direction of CCW about
-    # 50% of the maximum torque.
+    # It means currently applied load.
+    #
+    # The range of the value is 0~2047, and the unit is about 0.1%.
+    #
+    # If the value is 0~1,023, it means the load works to the CCW
+    # direction.
+    #
+    # If the value is 1,024~2,047, it means the load works to the CW
+    # direction. That is, the 10th bit becomes the direction bit to
+    # control the direction, and 1,024 is equal to 0. For example, the
+    # value is 512, it means the load is detected in the direction of
+    # CCW about 50% of the maximum torque.
+    #
+    # Control Area 40
     # Read Only
     def getPresentLoad(self):
-        return self.__read2(FIELD_PRESENT_LOAD);
+        return self.__read2Bytes(FIELD_PRESENT_LOAD);
 
 
 
     # It is the size of the present voltage supplied. This value is 10
     # times larger than the actual voltage. For example, when 10V is
-    # supplied, the data value is 100 (0x64) If Present Voltage(42)
-    # value is out of range, Voltage Range Error Bit (Bit0) of Status
-    # Packet is returned as ‘1’ and Alarm is triggered and set the
-    # address 17 and set 1 to the Bit 0 of the address 18.
+    # supplied, the data value is 100 (0x64)
+    #
+    # If Present Voltage(42) value is out of range, Voltage Range
+    # Error Bit (Bit0) of Status Packet is returned as ‘1’ and Alarm
+    # is triggered and set the address 17 and set 1 to the Bit 0 of
+    # the address 18.
+    #
+    # Control Area 42
     # Read Only
     def getPresentVoltage(self):
-        return self.__read1(FIELD_PRESENT_VOLTAGE);
+        return self.__read1Byte(FIELD_PRESENT_VOLTAGE);
 
 
 
@@ -433,45 +610,55 @@ class AX12A:
     # value is identical to the actual temperature in Celsius. For
     # example, if the data value is 85 (0x55), the current internal
     # temperature is 85°C.
+    #
+    # Control Area 43
     # Read Only
     def getPresentTemperature(self):
-        return self.__read1(FIELD_PRESENT_TEMPERATURE);
+        return self.__read1Byte(FIELD_PRESENT_TEMPERATURE);
 
 
 
     # 0 No instruction registered by REG_WRITE.
     # 1 Instruction registered by REG_WRITE exsists.
+    #
+    # Control Area 44
     # Read Only
     def getRegisteredInstruction(self):
-        return self.__read1(FIELD_REGISTERED_INSTRUCTION);
+        return self.__read1Byte(FIELD_REGISTERED_INSTRUCTION);
 
 
 
     # 0 Goal position command execution is completed
     # 1 Goal position command execution is in progress
+    #
+    # Control Area 46
     # Read Only
     def getMoving(self):
-        return self.__read1(FIELD_MOVING);
+        return self.__read1Byte(FIELD_MOVING);
 
 
 
     # 0 EEPROM area can be modified
     # 1 EEPROM area cannot be modified
+    #
+    # Control Area 47
     def getLock(self):
-        return self.__read1(FIELD_LOCK);
+        return self.__read1Byte(FIELD_LOCK);
 
     def setLock(self, value):
-        self.__write1(FIELD_LOCK, value);
+        self.__write1Byte(FIELD_LOCK, value);
 
 
 
     # Minimum current to drive motor. This value ranges from 0x20 to
     # 0x3FF.
+    #
+    # Control Area 48
     def getPunch(self):
-        return self.__read2(FIELD_PUNCH);
+        return self.__read2Bytes(FIELD_PUNCH);
 
     def setPunch(self, value):
-        self.__write2(FIELD_PUNCH, value);
+        self.__write2Bytes(FIELD_PUNCH, value);
 
 
 
@@ -481,41 +668,35 @@ class AX12A:
 
 
 
-    def __read1(self, field):
+    def __read1Byte(self, field):
         self.tty.openPort()
         self.tty.setBaudRate(1000000)
         response, result, error = self.protocol.read1ByteTxRx(self.tty, self.deviceId, field)
-        self.__verifyResponse(result, error, "read1ByteTxRx (tty: " + self.ttyName + " id=" + str(self.deviceId) + " field=" + self.__fieldToString(field) + ")")
+        self.__verifyResponse(result, error, "ERROR: read1ByteTxRx('%s', %s, %s)" % (self.ttyName, self.deviceId, self.__fieldToString(field)));
         self.tty.closePort()
         return response
 
-    def __read2(self, field):
+    def __read2Bytes(self, field):
         self.tty.openPort()
         self.tty.setBaudRate(1000000)
         response, result, error = self.protocol.read2ByteTxRx(self.tty, self.deviceId, field)
-        self.__verifyResponse(result, error, "read2ByteTxRx (tty: " + self.ttyName + " id=" + str(self.deviceId) + " field=" + self.__fieldToString(field) + ")")
+        self.__verifyResponse(result, error, "ERROR: read2ByteTxRx('%s', %s, %s)" % (self.ttyName, self.deviceId, self.__fieldToString(field)));
         self.tty.closePort()
         return response
 
-    def __write1(self, field, value):
+    def __write1Byte(self, field, value):
         self.tty.openPort()
         self.tty.setBaudRate(1000000)
         result, error = self.protocol.write1ByteTxRx(self.tty, self.deviceId, field, value)
-        self.__verifyResponse(result, error, "write1ByteTxRx (tty: " + self.ttyName + " id=" + str(self.deviceId) + " field=" + self.__fieldToString(field) + " value=" + str(value) + ")")
+        self.__verifyResponse(result, error, "ERROR: write1ByteTxRx('%s', %s, %s, %s)" % (self.ttyName, self.deviceId, self.__fieldToString(field), value))
         self.tty.closePort()
 
-    def __write2(self, field, value):
+    def __write2Bytes(self, field, value):
         self.tty.openPort()
         self.tty.setBaudRate(1000000)
         result, error = self.protocol.write2ByteTxRx(self.tty, self.deviceId, field, value)
-        self.__verifyResponse(result, error, "write2ByteTxRx (tty: " + self.ttyName + " id=" + str(self.deviceId) + " field=" + self.__fieldToString(field) + " value=" + str(value) + ")")
+        self.__verifyResponse(result, error, "ERROR: write2ByteTxRx('%s', %s, %s, %s)" % (self.ttyName, self.deviceId, self.__fieldToString(field), value))
         self.tty.closePort()
-
-    def __verifyResponse(self, result, error, s):
-        if result != sdk.COMM_SUCCESS:
-            raise Exception("%s %s" % (s, self.protocol.getTxRxResult(result)))
-        elif error != 0:
-            raise Exception("%s %s" % (s, self.protocol.getRxPacketError(error)))
 
     def __fieldToString(self, field):
         if field == FIELD_MODEL_NUMBER:
@@ -582,3 +763,9 @@ class AX12A:
             return "LOCK"
         if field == FIELD_PUNCH:
             return "PUNCH"
+
+    def __verifyResponse(self, result, error, s):
+        if result != sdk.COMM_SUCCESS:
+            raise Exception("%s %s" % (s, self.protocol.getTxRxResult(result)))
+        elif error != 0:
+            raise Exception("%s %s" % (s, self.protocol.getRxPacketError(error)))
